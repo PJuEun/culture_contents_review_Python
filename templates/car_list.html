@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>차량 목록</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+
+<!--    # On_Sale_number = 0-->
+<!--    # On_Reservation_number = 1-->
+<!--    # -->
+<!--    # for i in range(0, len(result_dict), 1): {-->
+<!--    #     print(result_dict[i].get('state'))-->
+<!--        # if result_dict[i].get('state') == "ON_SALE":-->
+<!--        #     On_Sale_number += 1-->
+<!--        # elif result_dict[i].get('state') == ON_RESERVATION:-->
+<!--        #     On_Reservation_number += 1-->
+<!--    # }-->
+        function updateCar(id, afterState) {
+            const data = {
+                "id" : id,
+<!--                "name" : name,-->
+<!--                "state" : state-->
+                "afterState" : afterState
+            }
+
+            $.ajax({
+                type: "PUT",
+                url: "/car",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function(response) {
+                    location.reload();
+                }
+            })
+        }
+
+    // $(document).ready(function() {} 기능은 HTML이 모두 로딩된 이후에 다음 기능을 실행시켜라~
+    $(document).ready(function() {
+
+        $.ajax({
+            type: "GET",
+            url: "/car",
+            success: function(response) {
+                console.log(response)
+                for (let i=0; i < response.length; i++) {
+                    const res = response[i];
+                    const id = res.id;
+                    const name = res.name;
+                    const number = res.number;
+                    const price = res.price;
+                    const date = res.date;
+
+                    let state;
+                    let buttonName;
+                    let afterState;
+                    if (res.state === "ON_SALE") {
+                        state = "판매중"
+                        buttonName = "예약하기"
+                        afterState = "ON_RESERVATION"
+                    } else if (res.state === "ON_RESERVATION") {
+                        state = "예약중"
+                        buttonName = "예약취소"
+                        afterState = "ON_SALE"
+                    }
+
+                    $("#data-table").append(`
+                        <tr>
+                            <th>${name}</th>
+                            <td>${number}</td>
+                            <td>${price}</td>
+                            <td>${date}</td>
+                            <td>${state}</td>
+                            <td><button onclick="updateCar(${id}, '${afterState}')">${buttonName}</button></td>
+<!--                            <td><button onclick="updateCar(${id})">${buttonName}</button></td>-->
+<!--                            <td><button onclick="updateCar(${id}, ${name}, ${state})">${buttonName}</button></td>-->
+                        </tr>
+                    `)
+                }
+            }
+        });
+
+        $.ajax({
+            type: "GET",
+            url: "/car/stat",
+            success: function(response) {
+<!--              화면에 그려주면 완성!-->
+              const sum = response.sum
+              const average = response.average
+<!--              const on_sale_count = response.on_sale_count-->
+<!--              const on_reservation_count = response.on_reservation_count-->
+              const onSaleCount = response.ON_SALE
+              const onReservationCount = response.ON_RESERVATION
+              $("#sum-div").text(`차량 가격 총계 : ${sum}`)
+              $("#average-div").text(`차량 가격 평균 : ${average}`)
+<!--              $("#on-sale-count-div").text(`판매중인 차량 갯수 : ${on_sale_count}`)-->
+<!--              $("#on-reservation-count-div").text(`예약중인 차량 갯수 : ${on_reservation_count}`)-->
+              $("#on-sale-count-div").text(`판매중인 차량 갯수 : ${onSaleCount}`)
+              $("#on-reservation-count-div").text(`예약중인 차량 갯수 : ${onReservationCount}`)
+            }
+        });
+
+<!--        $.ajax({-->
+<!--            type: "GET",-->
+<!--            url: "/car/count",-->
+<!--            success: function(response) {-->
+<!--              const OnSaleNumber = response.OnSaleNumber-->
+<!--              const OnReservationNumber = response.OnReservationNumber-->
+<!--              $("#onsale-div").text(`판매중인 차량 갯수 : ${OnSaleNumber}`)-->
+<!--              $("#onreservation-div").text(`예약중인 차량 갯수 : ${OnReservationNumber}`)-->
+<!--            }-->
+<!--        });-->
+    });
+
+</script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+  <a class="navbar-brand" href="#">차량 관리 시스템</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">차량 조회<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/car_save">차량 등록</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div id="sum-div"></div>
+<div id="average-div"></div>
+<div id="on-sale-count-div"></div>
+<div id="on-reservation-count-div"></div>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">차량유형</th>
+      <th scope="col">차량 번호</th>
+      <th scope="col">가격</th>
+      <th scope="col">등록일자</th>
+      <th scope="col">예약 여부</th>
+      <th scope="col">버튼</th>
+    </tr>
+  </thead>
+  <tbody id="data-table">
+
+  </tbody>
+</table>
+<!--<div id="onsale-div"></div>-->
+<!--<div id="onreservation-div"></div>-->
+</body>
+</html>
+
+<!--
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>차량 목록</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script>
+    function renderData(response) {
+        for (let i = 0; i <response.length; i++) {
+            const res = response[i];
+            const id = res.id;
+평점 문자열을 반환            const type = res.type;
+            const number = res.number;
+            const price = res.price;
+            const date = res.date;
+
+            let status;
+            let buttonName;
+            let afterStatus;
+            if (res.status === "ON_SALE") {
+              status = "판매중"
+              buttonName = "예약하기"
+              afterStatus = "ON_RESERVATION"
+            } else if (res.status === "ON_RESERVATION") {
+              status = "예약중"
+              buttonName = "예약취소"
+              afterStatus = "ON_SALE"
+            }
+
+            $("#data-table").append(`
+                <tr>
+                    <th>${type}</th>
+                    <td>${number}</td>
+                    <td>${price}</td>
+                    <td>${date}</td>
+                    <td>${status}</td>
+                    <td><button onclick="updateCar(${id}, '${afterStatus}')">${buttonName}</button></td>
+                </tr>
+            `)
+        }
+    }
+
+    function updateCar(id, afterStatus) {
+        const data = {
+            "id": id,
+            "afterStatus": afterStatus
+        }
+
+        $.ajax({
+            type: "PUT",
+            url: "/car",
+            contentType: "application/json",
+            data: JSON.stringify(data),
+            success: function(response) {
+                location.reload();
+            }
+        })
+    }
+
+    // $(document).ready(function() {}) 기능은, HTML이 모두 로딩 된 이후에 다음 기능을 실행시켜라~
+    $(document).ready(function() {
+        $.ajax({
+            type: "GET",
+            url: "/car",
+            success: function(response) {
+                renderData(response);
+                $.ajax({
+                  type: "GET",
+                  url: "/car/stat",
+                  success: function(response) {
+                    // 화면에 그려 주면 완성!
+                    const sum = response.sum
+                    const average = response.average
+                    $("#sum-div").text(`차량 가격 총계 : ${sum}`)
+                    $("#average-div").text(`차량 가격 평균 : ${average}`)
+                  }
+              });
+            }
+        });
+    });
+
+</script>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-light" style="background-color: #e3f2fd;">
+  <a class="navbar-brand" href="#">차량 관리 시스템</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="navbarNav">
+    <ul class="navbar-nav">
+      <li class="nav-item active">
+        <a class="nav-link" href="#">차량 목록<span class="sr-only">(current)</span></a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="/car_save.html">차량 등록</a>
+      </li>
+    </ul>
+  </div>
+</nav>
+<div id="sum-div"></div>
+<div id="average-div"></div>
+<table class="table">
+  <thead>
+    <tr>
+      <th scope="col">차량유형</th>
+      <th scope="col">차량 번호</th>
+      <th scope="col">가격</th>
+      <th scope="col">등록일자</th>
+      <th scope="col">예약 여부</th>
+      <th scope="col">버튼</th>
+    </tr>
+  </thead>
+  <tbody id="data-table">
+
+  </tbody>
+</table>
+
+</body>
+</html>-->
