@@ -1,10 +1,14 @@
 import pymysql
 import requests
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template
 
 app = Flask(__name__)
 db = pymysql.connect(host='localhost', port=3306, user='root', password='1234', db='library', charset='utf8')
 cursor = db.cursor()
+
+@app.route("/index", methods=["GET"])
+def main_page():
+    return render_template("book_search.html")
 
 #
 # API = 약속

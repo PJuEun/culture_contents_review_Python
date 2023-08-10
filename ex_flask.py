@@ -30,7 +30,7 @@ cursor = db.cursor()
 
 @app.route("/page", methods=["GET"])
 def home_page():
-    return render_template('index.html')
+    return render_template('flask.html')
 
 # http://127.0.0.1:5000/hello
 # GET /hello -> Hello World

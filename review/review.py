@@ -50,6 +50,7 @@ def review_list_page():
 def review_update_page():
     return render_template('review_update.html')
 
+
 # POST : 데이터 집어넣기
 @app.route("/review", methods=["POST"])
 def save_review():
